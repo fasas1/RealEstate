@@ -1,6 +1,7 @@
 ﻿using ExclusiveVillaApi.Data;
 using ExclusiveVillaApi.Models;
 using ExclusiveVillaApi.Models.DTO;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExclusiveVillaApi.Controllers
@@ -127,5 +128,50 @@ namespace ExclusiveVillaApi.Controllers
             return NoContent();
         }
 
+        [HttpPatch("{id:int}", Name = "UpdatePartialVilla")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+        public IActionResult UpdatePartialVilla(int id, JsonPatchDocument<VilleDTO> patchDTO)
+        {
+            if (patchDTO == null || id == 0)
+            {
+                return BadRequest();
+            }
+            var ville = _db.Villes.FirstOrDefault(u => u.Id == id);
+
+            VilleDTO villeDTO = new()
+            {
+                Amenity = ville.Amenity,
+                Name = ville.Name,
+                Id = ville.Id,
+                Occupancy = ville.Occupancy,
+                Details = ville.Details,
+                Rate = ville.Rate,
+                Sqft = ville.Sqft
+            };
+            if (ville == null)
+            {
+                return BadRequest();
+            }
+            patchDTO.ApplyTo(villeDTO, ModelState);
+            Ville    model = new()
+            {
+                Amenity = villeDTO.Amenity,
+                Name = villeDTO.Name,
+                Id = villeDTO.Id,
+                Occupancy = villeDTO.Occupancy,
+                Details = villeDTO.Details,
+                Rate = villeDTO.Rate,
+                Sqft = villeDTO.Sqft
+            };
+            _db.Villes.Update(model);
+            _db.SaveChanges();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return NoContent();
+        }
     }
 }
