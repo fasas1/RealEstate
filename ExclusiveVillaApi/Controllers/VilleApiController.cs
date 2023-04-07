@@ -3,6 +3,7 @@ using ExclusiveVillaApi.Models;
 using ExclusiveVillaApi.Models.DTO;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExclusiveVillaApi.Controllers
 {
@@ -18,22 +19,22 @@ namespace ExclusiveVillaApi.Controllers
         }
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        public ActionResult <IEnumerable<VilleDTO>> GetVilles()
+        public async Task<ActionResult <IEnumerable<VilleDTO>>> GetVilles()
         {
-            return Ok(_db.Villes.ToList());
+            return Ok(await _db.Villes.ToListAsync());
         }
 
         [HttpGet("{id:int}", Name = "GetVille")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<VilleDTO> GetVille(int id)
+        public async Task<ActionResult<VilleDTO>> GetVille(int id)
         {
             if (id == 0)
             {
                 return BadRequest();
             }
-            var ville = _db.Villes.FirstOrDefault(u => u.Id == id);
+            var ville = await _db.Villes.FirstOrDefaultAsync(u => u.Id == id);
             if (ville == null)
             {
                 return NotFound();
@@ -44,13 +45,13 @@ namespace ExclusiveVillaApi.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<VilleDTO> CreateVilla([FromBody] VilleDTO villeDTO)
+        public async Task<ActionResult<VilleDTO>> CreateVilla([FromBody] VilleCreateDTO villeDTO)
         {
             //if (!ModelState.IsValid)
             //{
             //    return BadRequest(ModelState);
             //}
-            if (_db.Villes.FirstOrDefault(u => u.Name.ToLower() == villeDTO.Name.ToLower()) != null)
+            if (await _db.Villes.FirstOrDefaultAsync(u => u.Name.ToLower() == villeDTO.Name.ToLower()) != null)
             {
                 ModelState.AddModelError("Custom Error", "Villa Already Exists!");
                 return BadRequest(ModelState);
@@ -59,24 +60,23 @@ namespace ExclusiveVillaApi.Controllers
             {
                 return BadRequest(villeDTO);
             }
-            if (villeDTO.Id > 0)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
+            //if (villeDTO.Id > 0)
+            //{
+            //    return StatusCode(StatusCodes.Status500InternalServerError);
+            //}
             Ville model = new()
             {
                 Amenity = villeDTO.Amenity,
                 Name = villeDTO.Name,
-                Id = villeDTO.Id,
                 Occupancy = villeDTO.Occupancy,
                 Details = villeDTO.Details,
                 Rate = villeDTO.Rate,
                 Sqft = villeDTO.Sqft
             };
-            _db.Villes.Add(model);
-            _db.SaveChanges();
+           await _db.Villes.AddAsync(model);
+           await _db.SaveChangesAsync();
 
-            return CreatedAtRoute("GetVille", new { id = villeDTO.Id }, villeDTO);
+            return CreatedAtRoute("GetVille", new { id = model.Id}, model);
         }
 
         [HttpDelete("{id:int}", Name = "DeleteVill")]
@@ -85,25 +85,25 @@ namespace ExclusiveVillaApi.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public IActionResult DeleteVille(int id)
+        public async Task<IActionResult> DeleteVille(int id)
         {
             if (id == 0)
             {
                 return BadRequest();
             }
-            var ville = _db.Villes.FirstOrDefault(u => u.Id == id);
+            var ville = await _db.Villes.FirstOrDefaultAsync(u => u.Id == id);
             if (ville == null)
             {
                 return NotFound();
             }
             _db.Villes.Remove(ville);
-            _db.SaveChanges();
+           await _db.SaveChangesAsync();
             return NoContent();
         }
         [HttpPut("{id:int}", Name = "UpdateVilla")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult UpdateVilla(int id, [FromBody] VilleDTO villeDTO)
+        public async Task<IActionResult> UpdateVilla(int id, [FromBody] VilleUpdateDTO villeDTO)
         {
             if (villeDTO == null || id != villeDTO.Id)
             {
@@ -124,7 +124,7 @@ namespace ExclusiveVillaApi.Controllers
                 Sqft = villeDTO.Sqft
             };
             _db.Villes.Update(model);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
             return NoContent();
         }
 
@@ -132,15 +132,15 @@ namespace ExclusiveVillaApi.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public IActionResult UpdatePartialVilla(int id, JsonPatchDocument<VilleDTO> patchDTO)
+        public async Task<IActionResult> UpdatePartialVilla(int id, JsonPatchDocument<VilleUpdateDTO> patchDTO)
         {
             if (patchDTO == null || id == 0)
             {
                 return BadRequest();
             }
-            var ville = _db.Villes.FirstOrDefault(u => u.Id == id);
+            var ville = await _db.Villes.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
 
-            VilleDTO villeDTO = new()
+            VilleUpdateDTO villeDTO = new()
             {
                 Amenity = ville.Amenity,
                 Name = ville.Name,
@@ -166,7 +166,7 @@ namespace ExclusiveVillaApi.Controllers
                 Sqft = villeDTO.Sqft
             };
             _db.Villes.Update(model);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

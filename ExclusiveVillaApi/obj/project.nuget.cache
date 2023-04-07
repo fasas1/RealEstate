@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "Wiptock+A1/beJcygtqvrw1wMKu8smmM99PAyVZDaiXq/NSKUeyAehSZjpHNqb1W1nN2G+WTGevdseV3nJolBw==",
+  "dgSpecHash": "6a0ntmM9OXhA8xW2gtP9zDVoKxqSHpwCqoK0g2IKYdJXBYYDQOy9vhQuutz5nclRHQiydl3ai+16/DO/tcJqEg==",
   "success": true,
   "projectFilePath": "C:\\Users\\BABZ\\source\\repos\\ExclusiveVilla\\ExclusiveVillaApi\\ExclusiveVillaApi.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\BABZ\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
+    "C:\\Users\\BABZ\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.0\\automapper.extensions.microsoft.dependencyinjection.12.0.0.nupkg.sha512",
     "C:\\Users\\BABZ\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\BABZ\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",
     "C:\\Users\\BABZ\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
