@@ -2,6 +2,7 @@
 using ExclusiveVillaApi.Data;
 using ExclusiveVillaApi.Models;
 using ExclusiveVillaApi.Models.DTO;
+using ExclusiveVillaApi.Repository.IRepository;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,11 @@ namespace ExclusiveVillaApi.Controllers
 
     public class VilleApiController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IVilleRepository _dbVille;
         private readonly IMapper _mapper;
-        public VilleApiController(ApplicationDbContext db, IMapper mapper)
+        public VilleApiController(IVilleRepository dbVille, IMapper mapper)
         {
-            _db = db;
+            _dbVille = dbVille;
             _mapper = mapper;
         }
 
@@ -25,7 +26,7 @@ namespace ExclusiveVillaApi.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         public async Task<ActionResult <IEnumerable<VilleDTO>>> GetVilles()
         {
-            IEnumerable<Ville> villeList = await _db.Villes.ToListAsync();
+            IEnumerable<Ville> villeList = await _dbVille.GetAllAsync();
 
             return Ok(_mapper.Map<List<VilleDTO>>(villeList));
         }
@@ -40,7 +41,7 @@ namespace ExclusiveVillaApi.Controllers
             {
                 return BadRequest();
             }
-            var ville = await _db.Villes.FirstOrDefaultAsync(u => u.Id == id);
+            var ville = await _dbVille.GetAsync((u => u.Id == id));
             if (ville == null)
             {
                 return NotFound();
@@ -57,7 +58,7 @@ namespace ExclusiveVillaApi.Controllers
             //{
             //    return BadRequest(ModelState);
             //}
-            if (await _db.Villes.FirstOrDefaultAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
+            if (await _dbVille.GetAsync(u => u.Name.ToLower() == createDTO.Name.ToLower()) != null)
             {
                 ModelState.AddModelError("Custom Error", "Villa Already Exists!");
                 return BadRequest(ModelState);
@@ -66,27 +67,14 @@ namespace ExclusiveVillaApi.Controllers
             {
                 return BadRequest(createDTO);
             }
-            //if (villeDTO.Id > 0)
-            //{
-            //    return StatusCode(StatusCodes.Status500InternalServerError);
-            //}
+      
             Ville model = _mapper.Map<Ville>(createDTO);
-            //Ville model = new()
-            //{
-            //    Amenity = createDTO.Amenity,
-            //    Name = createDTO.Name,
-            //    Occupancy = createDTO.Occupancy,
-            //    Details = createDTO.Details,
-            //    Rate = createDTO.Rate,
-            //    Sqft = createDTO.Sqft
-            //};
-           await _db.Villes.AddAsync(model);
-           await _db.SaveChangesAsync();
-
-            return CreatedAtRoute("GetVille", new { id = model.Id}, model);
+        
+           await _dbVille.CreateAsync(model);
+           return CreatedAtRoute("GetVille", new { id = model.Id}, model);
         }
 
-        [HttpDelete("{id:int}", Name = "DeleteVill")]
+        [HttpDelete("{id:int}", Name = "DeleteVille")]
 
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -98,15 +86,15 @@ namespace ExclusiveVillaApi.Controllers
             {
                 return BadRequest();
             }
-            var ville = await _db.Villes.FirstOrDefaultAsync(u => u.Id == id);
+            var ville = await _dbVille.GetAsync(u => u.Id == id);
             if (ville == null)
             {
                 return NotFound();
             }
-            _db.Villes.Remove(ville);
-           await _db.SaveChangesAsync();
+            await _dbVille.RemoveAsync(ville);
             return NoContent();
         }
+
         [HttpPut("{id:int}", Name = "UpdateVilla")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -118,9 +106,9 @@ namespace ExclusiveVillaApi.Controllers
             }
        
             Ville model = _mapper.Map<Ville>(updateDTO);
-           
-            _db.Villes.Update(model);
-            await _db.SaveChangesAsync();
+
+            await _dbVille.UpdateAsync(model);
+          
             return NoContent();
         }
 
@@ -134,7 +122,7 @@ namespace ExclusiveVillaApi.Controllers
             {
                 return BadRequest();
             }
-            var ville = await _db.Villes.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
+            var ville = await _dbVille.GetAsync(u => u.Id == id, tracked:false);
             VilleUpdateDTO villeDTO = _mapper.Map<VilleUpdateDTO>(ville);
            
             if (ville == null)
@@ -145,8 +133,8 @@ namespace ExclusiveVillaApi.Controllers
 
             Ville model = _mapper.Map<Ville>(villeDTO);
            
-            _db.Villes.Update(model);
-            await _db.SaveChangesAsync();
+            await  _dbVille.UpdateAsync(model);
+          
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

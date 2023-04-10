@@ -17,13 +17,13 @@ namespace ExclusiveVillaApi.Repository
             _db = db;
             
         }
-        public async Task Create(Ville entity)
+        public async Task CreateAsync(Ville entity)
         {
             await _db.Villes.AddAsync(entity);
-            await Save();
+            await SaveAsync();
         }
 
-        public async Task<Ville> Get(Expression<Func<Ville, bool>> filter = null, bool tracked = true)
+        public async Task<Ville> GetAsync(Expression<Func<Ville, bool>> filter = null, bool tracked = true)
         {
             IQueryable<Ville> query = _db.Villes;
             if (!tracked)
@@ -37,7 +37,7 @@ namespace ExclusiveVillaApi.Repository
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<List<Ville>> GetAll(Expression<Func<Ville, bool>> filter = null)
+        public async Task<List<Ville>> GetAllAsync(Expression<Func<Ville, bool>> filter = null)
         {
             IQueryable<Ville> query = _db.Villes;
 
@@ -48,15 +48,21 @@ namespace ExclusiveVillaApi.Repository
              return await query.ToListAsync();
         }
 
-        public async Task Remove(Ville entity)
+        public async Task RemoveAsync(Ville entity)
         {
              _db.Villes.Remove(entity);
-            await Save();
+            await SaveAsync();
         }
 
-        public async Task Save()
+        public async Task SaveAsync()
         {
             await _db.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Ville entity)
+        {
+            _db.Villes.Update(entity);
+            await SaveAsync();
         }
     }
 }
