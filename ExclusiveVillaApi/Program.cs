@@ -3,6 +3,7 @@ using ExclusiveVillaApi.Data;
 using ExclusiveVillaApi.Repository;
 using ExclusiveVillaApi.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using ExclusiveVillaApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddControllers(option =>
 
 }).AddNewtonsoftJson().AddXmlDataContractSerializerFormatters();
 builder.Services.AddScoped<IVilleRepository, VilleRepository>();
+builder.Services.AddScoped<IVilleNumberRepository, VilleNumberRepository>();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

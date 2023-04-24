@@ -8,19 +8,18 @@ using System.Linq.Expressions;
 
 namespace ExclusiveVillaApi.Repository
 {
-    public class VilleRepository : Repository<Ville>, IVilleRepository
+    public class VilleNumberRepository : Repository<VilleNumber>, IVilleNumberRepository
     {
         private readonly ApplicationDbContext _db;
-        public VilleRepository(ApplicationDbContext db) : base(db)
+        public VilleNumberRepository(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
 
-
-        public async Task<Ville> UpdateAsync(Ville entity)
+        public async Task<VilleNumber> UpdateAsync(VilleNumber entity)
         {
             entity.UpdatedDate = DateTime.Now;
-            _db.Villes.Update(entity);
+            _db.VilleNumbers.Update(entity);
             await _db.SaveChangesAsync();
             return entity;
         }

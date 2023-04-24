@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExclusiveVillaApi.Data
 {
-    public class ApplicationDbContext:DbContext
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         public DbSet<Ville> Villes { get; set; }
+        public DbSet<VilleNumber> VilleNumbers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
